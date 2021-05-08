@@ -1,0 +1,37 @@
+#include <iostream>
+#include <windows.h>
+
+HANDLE g_event = INVALID_HANDLE_VALUE;
+std::string g_workerName;
+DWORD WINAPI Derived(LPVOID threadParameter) {    
+    for (int i = 0; i < 10; ++i) {
+        std::cout << i << std::endl;
+    }
+    SetEvent(g_event);
+    return 0;
+}
+
+/*
+- shared resource
+- race condition
+- deadlock
+- livelock
+*/
+
+int main() {
+    g_event = CreateEventA(0, TRUE, FALSE, 0);
+    DWORD threadId = 0; // TID
+    HANDLE thread1 = CreateThread(
+        0,
+        0,
+        Derived,
+        0,
+        0,
+        &threadId
+    );
+    WaitForSingleObject(g_event, INFINITE);
+    for (int i = 10; i < 20; ++i) {
+        std::cout << i << std::endl;
+    }
+    CloseHandle(thread1);
+}
